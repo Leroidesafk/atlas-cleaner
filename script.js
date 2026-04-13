@@ -64,7 +64,7 @@ async function handleFile(file) {
         "region/",
         "dimensions/minecraft/overworld/entities/",
         "dimensions/minecraft/overworld/poi/",
-        "dimensions/overworld/region/"
+        "dimensions/minecraft/overworld/region/"
     ];
 
     for (const path in zip.files) {
