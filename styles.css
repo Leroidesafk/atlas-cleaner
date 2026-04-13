@@ -131,18 +131,6 @@ body {
     box-shadow: inset 0 -6px 0 var(--blue-4);
 }
 
-.button--blue::before {
-    box-shadow:
-        inset 2px 2px 0 0 hsla(0, 0%, 100%, .2),
-        inset -2px -2px 0 0 hsla(0, 0%, 100%, .1);
-}
-
-.button--blue:hover::before {
-    box-shadow:
-        inset 2px 2px 0 0 hsla(0, 0%, 100%, .35),
-        inset -2px -2px 0 0 hsla(0, 0%, 100%, .2);
-}
-
 .button--red {
     background: var(--red-1);
     box-shadow: inset 0 -6px 0 var(--red-2);
@@ -153,16 +141,8 @@ body {
     box-shadow: inset 0 -6px 0 var(--red-4);
 }
 
-.button--red::before {
-    box-shadow:
-        inset 2px 2px 0 0 hsla(0, 0%, 100%, .2),
-        inset -2px -2px 0 0 hsla(0, 0%, 100%, .1);
-}
-
-.button--red:hover::before {
-    box-shadow:
-        inset 2px 2px 0 0 hsla(0, 0%, 100%, .35),
-        inset -2px -2px 0 0 hsla(0, 0%, 100%, .2);
+.button:active {
+    border: 2px solid white;
 }
 
 .extra-buttons {
