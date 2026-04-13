@@ -1,17 +1,35 @@
 let selectedFile;
 let cleanedBlob;
 
+const normalizePath = (p) => p.replace(/\\/g, "/");
+
 const uploadUI = document.getElementById("uploadUI");
 const fileName = document.getElementById("fileName");
 const dropZone = document.getElementById("dropZone");
 const fileInput = document.getElementById("fileInput");
 const downloadBtn = document.getElementById("downloadBtn");
 const fileButton = document.getElementById("fileButton");
-const extraButtons = document.getElementById("extraButtons");
 const goAtlasBtn = document.getElementById("goAtlasBtn");
 const convertAgainBtn = document.getElementById("convertAgainBtn");
 
-// UPLOAD
+const foldersToDelete = [
+    "advancements/",
+    "playerdata/",
+    "players/",
+    "stats/"
+];
+
+const foldersToClean = [
+    "entities/",
+    "poi/",
+    "region/",
+    "dimensions/minecraft/overworld/entities/",
+    "dimensions/minecraft/overworld/poi/",
+    "dimensions/minecraft/overworld/region/"
+];
+
+// ---------------- UPLOAD ----------------
+
 fileButton.addEventListener("click", (e) => {
     e.stopPropagation();
     fileInput.click();
@@ -21,7 +39,8 @@ fileInput.addEventListener("change", () => {
     handleFile(fileInput.files[0]);
 });
 
-// DRAG & DROP
+// ---------------- DRAG & DROP ----------------
+
 dropZone.addEventListener("dragover", (e) => {
     e.preventDefault();
     dropZone.classList.add("dragover");
@@ -34,55 +53,62 @@ dropZone.addEventListener("dragleave", () => {
 dropZone.addEventListener("drop", (e) => {
     e.preventDefault();
     dropZone.classList.remove("dragover");
-
-    const file = e.dataTransfer.files[0];
-    handleFile(file);
+    handleFile(e.dataTransfer.files[0]);
 });
 
-// ZIP CLEANER
+// ---------------- CORE PIPELINE ----------------
+
 async function handleFile(file) {
     if (!file) return;
 
     selectedFile = file;
-    downloadName = file.name.replace(/\.zip$/i, "")
+    const downloadName = file.name.replace(/\.zip$/i, "");
+
     fileName.textContent = file.name;
+
     uploadUI.classList.add("hidden");
     downloadBtn.classList.remove("hidden");
     downloadBtn.textContent = "Processing...";
 
     const zip = await JSZip.loadAsync(file);
     const newZip = new JSZip();
-    const foldersToDelete = [
-        "advancements/",
-        "playerdata/",
-        "players/",
-        "stats/"
-    ];
-    const foldersToClean = [
-        "entities/",
-        "poi/",
-        "region/",
-        "dimensions/minecraft/overworld/entities/",
-        "dimensions/minecraft/overworld/poi/",
-        "dimensions/minecraft/overworld/region/"
-    ];
 
-    for (const path in zip.files) {
-        const entry = zip.files[path];
-        if (foldersToDelete.some(f => path.startsWith(f))) continue;
+    const entries = Object.entries(zip.files);
+
+    for (const [path, entry] of entries) {
+
+        const normalizedPath = normalizePath(path);
+
+        if (foldersToDelete.some(f => normalizedPath.startsWith(f))) {
+            continue;
+        }
+
         if (entry.dir) continue;
+
         const content = await entry.async("uint8array");
-        const isInCleanFolder = foldersToClean.some(f => path.includes(f));
-        if (isInCleanFolder && content.length === 0) continue;
+
+        const isInCleanFolder = foldersToClean.some(f =>
+            normalizedPath.startsWith(f)
+        );
+
+        if (isInCleanFolder && content.length === 0) {
+            continue;
+        }
+
         newZip.file(path, content);
     }
 
-    cleanedBlob = await newZip.generateAsync({ type: "blob" });
+    cleanedBlob = await newZip.generateAsync({
+        type: "blob",
+        compression: "DEFLATE"
+    });
+
     downloadBtn.textContent = "Download";
     convertAgainBtn.classList.remove("hidden");
 }
 
-// DOWNLOAD
+// ---------------- DOWNLOAD ----------------
+
 downloadBtn.addEventListener("click", (e) => {
     e.stopPropagation();
 
@@ -94,39 +120,29 @@ downloadBtn.addEventListener("click", (e) => {
     const url = URL.createObjectURL(cleanedBlob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${downloadName}-cleaned.zip`;
+    a.download = `${selectedFile.name.replace(/\.zip$/i, "")}-cleaned.zip`;
     a.click();
     URL.revokeObjectURL(url);
 });
+
+// ---------------- EXTERNAL LINKS ----------------
 
 goAtlasBtn.addEventListener("click", () => {
     window.open("https://atlas.minecraft.net/", "_blank");
 });
 
+// ---------------- RESET ----------------
+
 convertAgainBtn.addEventListener("click", () => {
-    // reset file
     selectedFile = null;
     cleanedBlob = null;
-    // reset UI
     fileInput.value = "";
 
     fileName.textContent = "";
     uploadUI.classList.remove("hidden");
+
     downloadBtn.classList.add("hidden");
     convertAgainBtn.classList.add("hidden");
+
     downloadBtn.textContent = "Download";
-});
-
-const expander = document.querySelector(".text-expander");
-const moreText = document.querySelector(".more-text");
-const label = expander.querySelector(".label");
-
-expander.addEventListener("click", () => {
-    const isOpen = expander.classList.toggle("active");
-
-    moreText.classList.toggle("show");
-
-    label.textContent = isOpen ? "Read less" : "Read more";
-
-    expander.setAttribute("aria-expanded", isOpen);
 });
