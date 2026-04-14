@@ -113,7 +113,7 @@ downloadBtn.addEventListener("click", (e) => {
     e.stopPropagation();
 
     if (!cleanedBlob) {
-        alert("Le fichier n'est pas encore prêt !");
+        alert("The file isn't ready yet!");
         return;
     }
 
