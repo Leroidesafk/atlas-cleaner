@@ -25,7 +25,13 @@ const foldersToClean = [
     "region/",
     "dimensions/minecraft/overworld/entities/",
     "dimensions/minecraft/overworld/poi/",
-    "dimensions/minecraft/overworld/region/"
+    "dimensions/minecraft/overworld/region/",
+    "dimensions/minecraft/the_nether/entities/",
+    "dimensions/minecraft/the_nether/poi/",
+    "dimensions/minecraft/the_nether/region/",
+    "dimensions/minecraft/the_end/entities/",
+    "dimensions/minecraft/the_end/poi/",
+    "dimensions/minecraft/the_end/region/"
 ];
 
 // ---------------- UPLOAD ----------------
