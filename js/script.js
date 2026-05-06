@@ -20,18 +20,8 @@ const foldersToDelete = [
 ];
 
 const foldersToClean = [
-    "entities/",
-    "poi/",
-    "region/",
-    "dimensions/minecraft/overworld/entities/",
-    "dimensions/minecraft/overworld/poi/",
-    "dimensions/minecraft/overworld/region/",
-    "dimensions/minecraft/the_nether/entities/",
-    "dimensions/minecraft/the_nether/poi/",
-    "dimensions/minecraft/the_nether/region/",
-    "dimensions/minecraft/the_end/entities/",
-    "dimensions/minecraft/the_end/poi/",
-    "dimensions/minecraft/the_end/region/"
+    /^(entities|poi|region)\//,
+    /^dimensions\/[^/]+\/[^/]+\/(entities|poi|region)\//
 ];
 
 // ---------------- UPLOAD ----------------
@@ -93,9 +83,12 @@ async function handleFile(file) {
 
         const content = await entry.async("uint8array");
 
-        const isInCleanFolder = foldersToClean.some(f =>
-            normalizedPath.startsWith(f)
-        );
+        const isInCleanFolder = foldersToClean.some(f => {
+            if (typeof f === "string") {
+                return normalizedPath.startsWith(f);
+            }
+            return f.test(normalizedPath);
+        });
 
         if (isInCleanFolder && content.length === 0) {
             continue;
